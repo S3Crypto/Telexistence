@@ -395,15 +395,15 @@ Parameters:
 
 ## 📊 Time Breakdown
 
-- Reading and understanding the requirements: 30 minutes
-- Initial project setup and architecture: 2 hours
-- Implementing core entities and interfaces: 1 hour
-- Implementing controllers and services: 3 hours
-- Setting up repositories and database context: 1 hour
-- Configuring authentication and middleware: 1 hour
-- Testing and debugging: 2 hours
-- Setting up CI/CD and Terraform: 1.5 hours
-- Documentation: 1 hour
+- Reading and understanding the requirements: 15 minutes
+- Initial project setup and architecture: 15 minutes
+- Implementing core entities and interfaces: 30 minutes
+- Implementing controllers and services: 1 hour
+- Setting up repositories and database context: 30 minutes
+- Configuring authentication and middleware: 30 minutes
+- Testing and debugging: 30 minutes
+- Setting up CI/CD and Terraform: 15 minutes
+- Documentation: 15 minutes
 
 ## 📦 Future Enhancements
 
