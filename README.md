@@ -65,15 +65,15 @@ TelexistenceAPI is a comprehensive solution for remote robot operation, providin
 4. **Access the API**
    
    The API will be available at:
-   - HTTP: http://localhost:5000
-   - HTTPS: https://localhost:5001
+   - HTTP: http://localhost:5050
+   - HTTPS: https://localhost:5051
 
 ### Authentication
 
 To use the authenticated endpoints, first obtain a JWT token:
 
 ```bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5050/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
 ```
@@ -81,7 +81,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 Use the returned token in the Authorization header for subsequent requests:
 
 ```bash
-curl -X GET http://localhost:5000/api/status \
+curl -X GET http://localhost:5050/api/status \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
