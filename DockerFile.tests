@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy csproj files first to optimize layer caching 
+COPY ["src/TelexistenceAPI/TelexistenceAPI.csproj", "src/TelexistenceAPI/"]
+COPY ["src/TelexistenceAPI.Core/TelexistenceAPI.Core.csproj", "src/TelexistenceAPI.Core/"]
+COPY ["tests/TelexistenceAPI.Tests/TelexistenceAPI.Tests.csproj", "tests/TelexistenceAPI.Tests/"]
+COPY ["tests/TelexistenceAPI.IntegrationTests/TelexistenceAPI.IntegrationTests.csproj", "tests/TelexistenceAPI.IntegrationTests/"]
+
+# Restore packages
+RUN dotnet restore "src/TelexistenceAPI/TelexistenceAPI.csproj"
+RUN dotnet restore "src/TelexistenceAPI.Core/TelexistenceAPI.Core.csproj"
+RUN dotnet restore "tests/TelexistenceAPI.Tests/TelexistenceAPI.Tests.csproj"
+RUN dotnet restore "tests/TelexistenceAPI.IntegrationTests/TelexistenceAPI.IntegrationTests.csproj"
+
+# Copy everything else
+COPY . .
+
+# Build
+RUN dotnet build "tests/TelexistenceAPI.Tests/TelexistenceAPI.Tests.csproj" -c Release -o /app/build
+RUN dotnet build "tests/TelexistenceAPI.IntegrationTests/TelexistenceAPI.IntegrationTests.csproj" -c Release -o /app/build
+
+# Test entry point
+ENTRYPOINT ["dotnet", "test", "tests/TelexistenceAPI.IntegrationTests/TelexistenceAPI.IntegrationTests.csproj", "--logger:trx"]

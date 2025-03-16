@@ -1,0 +1,76 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FDBDE4D8-5B18-4008-A719-C76A86B29F43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelexistenceAPI", "src\TelexistenceAPI\TelexistenceAPI.csproj", "{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelexistenceAPI.Core", "src\TelexistenceAPI.Core\TelexistenceAPI.Core.csproj", "{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{98A9D31E-DDCA-4735-BA73-5CFBAD5A2EAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelexistenceAPI.Tests", "tests\TelexistenceAPI.Tests\TelexistenceAPI.Tests.csproj", "{33F7A85B-74F3-478F-99E0-C87547E4EB10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelexistenceAPI.IntegrationTests", "tests\TelexistenceAPI.IntegrationTests\TelexistenceAPI.IntegrationTests.csproj", "{C0909D10-28E9-4372-9559-DE7E7DC5C68C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4E7A7AA-37A9-47A7-9B35-9290D3C694A8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		docker-compose.yml = docker-compose.yml
+		docker-compose.test.yml = docker-compose.test.yml
+		Dockerfile = Dockerfile
+		Dockerfile.tests = Dockerfile.tests
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "terraform", "terraform", "{75DA8B0A-D042-4513-84AD-E3D3C3F09C20}"
+	ProjectSection(SolutionItems) = preProject
+		terraform\main.tf = terraform\main.tf
+		terraform\outputs.tf = terraform\outputs.tf
+		terraform\variables.tf = terraform\variables.tf
+		terraform\dev.tfvars = terraform\dev.tfvars
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{5C4981B3-E2BD-499E-A6BB-39156C57B9C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{8ADB5D82-BD89-4EC4-B4AC-73B7CED33048}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\cd.yml = .github\workflows\cd.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33F7A85B-74F3-478F-99E0-C87547E4EB10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33F7A85B-74F3-478F-99E0-C87547E4EB10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33F7A85B-74F3-478F-99E0-C87547E4EB10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33F7A85B-74F3-478F-99E0-C87547E4EB10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0909D10-28E9-4372-9559-DE7E7DC5C68C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0909D10-28E9-4372-9559-DE7E7DC5C68C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0909D10-28E9-4372-9559-DE7E7DC5C68C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0909D10-28E9-4372-9559-DE7E7DC5C68C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF6A3FF6-2A4C-4A1F-9A2C-DB44BEA9BF41} = {FDBDE4D8-5B18-4008-A719-C76A86B29F43}
+		{C0AF0C58-43CF-4F46-AB14-5A3AFA2E50C4} = {FDBDE4D8-5B18-4008-A719-C76A86B29F43}
+		{33F7A85B-74F3-478F-99E0-C87547E4EB10} = {98A9D31E-DDCA-4735-BA73-5CFBAD5A2EAF}
+		{C0909D10-28E9-4372-9559-DE7E7DC5C68C} = {98A9D31E-DDCA-4735-BA73-5CFBAD5A2EAF}
+		{8ADB5D82-BD89-4EC4-B4AC-73B7CED33048} = {5C4981B3-E2BD-499E-A6BB-39156C57B9C9}
+	EndGlobalSection
+EndGlobal
