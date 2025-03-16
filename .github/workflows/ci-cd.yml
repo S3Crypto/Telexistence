@@ -1,0 +1,95 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      
+    - name: Test
+      run: dotnet test --no-build --configuration Release --verbosity normal
+      
+    - name: Publish
+      run: dotnet publish src/TelexistenceAPI/TelexistenceAPI.csproj -c Release -o ${{github.workspace}}/publish
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-artifact
+        path: ${{github.workspace}}/publish
+        retention-days: 1
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: api-artifact
+        path: ${{github.workspace}}/publish
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.x
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+    
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-prod-rg' || 'telexistence-staging-rg' }}
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-prod-plan' || 'telexistence-staging-plan' }}
+        TF_VAR_app_service_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-api' || 'telexistence-api-staging' }}
+    
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-prod-rg' || 'telexistence-staging-rg' }}
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-prod-plan' || 'telexistence-staging-plan' }}
+        TF_VAR_app_service_name: ${{ github.ref == 'refs/heads/main' && 'telexistence-api' || 'telexistence-api-staging' }}
+    
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ github.ref == 'refs/heads/main' && 'telexistence-api' || 'telexistence-api-staging' }}
+        package: ${{github.workspace}}/publish
+        slot-name: production
