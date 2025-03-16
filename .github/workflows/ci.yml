@@ -1,0 +1,63 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: ci.yml
+        name: api-artifact
+        path: ${{github.workspace}}/publish
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.x
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+    
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: "telexistence-rg"
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: "telexistence-plan"
+        TF_VAR_app_service_name: "telexistence-api"
+    
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: "telexistence-rg"
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: "telexistence-plan"
+        TF_VAR_app_service_name: "telexistence-api"
+    
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: telexistence-api
+        package: ${{github.workspace}}/publish
+        slot-name: production
