@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDB=mongodb://mongodb:27017
+      - MongoDB__DatabaseName=TelexistenceDB
+      - Jwt__Key=YourSuperSecretKeyForDevelopmentEnvironmentOnly
+      - Jwt__Issuer=TelexistenceAPI
+      - Jwt__Audience=TelexistenceClients
+      - AllowedOrigins__0=http://localhost:3000
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
