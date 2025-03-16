@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TelexistenceAPI.Core.Entities;
 using TelexistenceAPI.Core.Interfaces;
 

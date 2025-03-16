@@ -10,10 +10,10 @@ COPY ["src/TelexistenceAPI.Core/TelexistenceAPI.Core.csproj", "src/TelexistenceA
 RUN dotnet restore "src/TelexistenceAPI/TelexistenceAPI.csproj"
 COPY . .
 WORKDIR "/src/src/TelexistenceAPI"
-RUN dotnet build "TelexistenceAPI.csproj" -c Release -o /app/build
+RUN dotnet build "TelexistenceAPI.csproj" -c Release -o /app/build --no-restore
 
 FROM build AS publish
-RUN dotnet publish "TelexistenceAPI.csproj" -c Release -o /app/publish
+RUN dotnet publish "TelexistenceAPI.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app
