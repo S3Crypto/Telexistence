@@ -1,37 +1,67 @@
-name: CI
+
+name: CD
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
     steps:
     - uses: actions/checkout@v3
     
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+    - name: Download artifact
+      uses: dawidd6/action-download-artifact@v2
       with:
-        dotnet-version: 8.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-      
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
-      
-    - name: Publish
-      run: dotnet publish src/TelexistenceAPI/TelexistenceAPI.csproj -c Release -o ${{github.workspace}}/publish
-      
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
+        workflow: ci.yml
+        workflow_conclusion: success
         name: api-artifact
         path: ${{github.workspace}}/publish
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        run_id: ${{ github.event.workflow_run.id }}
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.x
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+    
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: "telexistence-rg"
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: "telexistence-plan"
+        TF_VAR_app_service_name: "telexistence-api"
+    
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
+      env:
+        TF_VAR_resource_group_name: "telexistence-rg"
+        TF_VAR_location: "westus2"
+        TF_VAR_app_service_plan_name: "telexistence-plan"
+        TF_VAR_app_service_name: "telexistence-api"
+    
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: telexistence-api
+        package: ${{github.workspace}}/publish
+        slot-name: production
