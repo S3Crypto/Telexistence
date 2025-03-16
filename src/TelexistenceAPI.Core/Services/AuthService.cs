@@ -31,22 +31,40 @@ namespace TelexistenceAPI.Core.Services
             string password
         )
         {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user == null)
+            try
             {
-                throw new UnauthorizedAccessException("Invalid username or password");
-            }
+                _logger.LogInformation("Attempting to authenticate user: {Username}", username);
 
-            if (!VerifyPassword(password, user.PasswordHash))
+                var user = await _userRepository.GetByUsernameAsync(username);
+                if (user == null)
+                {
+                    _logger.LogWarning(
+                        "Authentication failed: User not found: {Username}",
+                        username
+                    );
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                if (!VerifyPassword(password, user.PasswordHash))
+                {
+                    _logger.LogWarning(
+                        "Authentication failed: Incorrect password for user: {Username}",
+                        username
+                    );
+                    throw new UnauthorizedAccessException("Invalid username or password");
+                }
+
+                var token = GenerateJwtToken(user.Id, user.Username, user.Roles);
+                var expiration = DateTime.UtcNow.AddHours(1);
+
+                _logger.LogInformation("User {Username} authenticated successfully", username);
+                return (token, expiration);
+            }
+            catch (Exception ex)
             {
-                throw new UnauthorizedAccessException("Invalid username or password");
+                _logger.LogError(ex, "Error during authentication for user {Username}", username);
+                throw;
             }
-
-            var token = GenerateJwtToken(user.Id, user.Username, user.Roles);
-            var expiration = DateTime.UtcNow.AddHours(1);
-
-            _logger.LogInformation("User {Username} authenticated successfully", username);
-            return (token, expiration);
         }
 
         public string HashPassword(string password)
@@ -63,35 +81,56 @@ namespace TelexistenceAPI.Core.Services
 
         private string GenerateJwtToken(string userId, string username, List<string> roles)
         {
-            var claims = new List<Claim>
+            try
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim(JwtRegisteredClaimNames.UniqueName, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, userId),
+                    new Claim(JwtRegisteredClaimNames.UniqueName, username),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
 
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                var jwtKey = _configuration["Jwt:Key"];
+                if (string.IsNullOrEmpty(jwtKey))
+                {
+                    _logger.LogError("JWT Key configuration is missing or empty");
+                    jwtKey = "DefaultSecretKeyForDevelopment";
+                }
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var expires = DateTime.UtcNow.AddHours(1);
+
+                var issuer = _configuration["Jwt:Issuer"] ?? "TelexistenceAPI";
+                var audience = _configuration["Jwt:Audience"] ?? "TelexistenceClients";
+
+                _logger.LogInformation(
+                    "Generating JWT token for user {Username} with issuer {Issuer} and audience {Audience}",
+                    username,
+                    issuer,
+                    audience
+                );
+
+                var token = new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    expires: expires,
+                    signingCredentials: creds
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
             }
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    _configuration["Jwt:Key"] ?? "DefaultSecretKeyForDevelopment"
-                )
-            );
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddHours(1);
-
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating JWT token for user {UserId}", userId);
+                throw;
+            }
         }
     }
 }

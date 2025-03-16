@@ -10,16 +10,9 @@ namespace TelexistenceAPI.Extensions
             return app;
         }
 
-        public static IApplicationBuilder UseHealthChecks(this IApplicationBuilder app)
+        public static IApplicationBuilder ConfigureHealthChecks(this IApplicationBuilder app)
         {
-            app.MapHealthChecks(
-                "/health",
-                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-                {
-                    ResponseWriter = HealthCheckResponseWriter.WriteResponse
-                }
-            );
-
+            // Health checks are now configured in UseApiConfiguration
             return app;
         }
 
@@ -34,6 +27,9 @@ namespace TelexistenceAPI.Extensions
             // HTTPS redirection
             app.UseHttpsRedirection();
 
+            // Setup routing - THIS MUST COME BEFORE ENDPOINTS
+            app.UseRouting();
+
             // CORS
             app.UseCors();
 
@@ -41,11 +37,21 @@ namespace TelexistenceAPI.Extensions
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Route endpoints
-            app.MapControllers();
+            // Map endpoints - this is where route mapping happens
+            app.UseEndpoints(endpoints =>
+            {
+                // Map controllers
+                endpoints.MapControllers();
 
-            // Health checks
-            app.UseHealthChecks();
+                // Map health checks
+                endpoints.MapHealthChecks(
+                    "/health",
+                    new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                    {
+                        ResponseWriter = HealthCheckResponseWriter.WriteResponse
+                    }
+                );
+            });
 
             return app;
         }

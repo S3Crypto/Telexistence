@@ -3,6 +3,7 @@ using Serilog;
 using TelexistenceAPI.Extensions;
 using TelexistenceAPI.Middleware;
 using TelexistenceAPI.Repositories;
+using TelexistenceAPI.Core.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +59,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddCorsPolicy(builder.Configuration);
 
 // Add health checks
-builder.Services.AddHealthChecks();
+builder.Services.AddAppHealthChecks();
 
 // Build the application
 var app = builder.Build();
@@ -75,15 +76,6 @@ app.UseSerilogRequestLogging();
 
 // Apply API configuration (middleware, auth, etc.)
 app.UseApiConfiguration(app.Environment);
-
-// Map health checks
-app.MapHealthChecks(
-    "/health",
-    new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-    {
-        ResponseWriter = HealthCheckResponseWriter.WriteResponse
-    }
-);
 
 // Seed sample data if needed
 using (var scope = app.Services.CreateScope())

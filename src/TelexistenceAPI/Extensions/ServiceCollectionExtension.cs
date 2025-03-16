@@ -87,7 +87,7 @@ namespace TelexistenceAPI.Extensions
             return services;
         }
 
-        public static IServiceCollection AddHealthChecks(this IServiceCollection services)
+        public static IServiceCollection AddAppHealthChecks(this IServiceCollection services)
         {
             services.AddHealthChecks().AddCheck<APIHealthCheck>("API");
 
