@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__MongoDB=mongodb://mongodb-test:27017
+      - MongoDB__DatabaseName=TelexistenceTestDB
+      - Jwt__Key=TestSecretKeyDoNotUseInProduction
+      - Jwt__Issuer=TelexistenceAPITest
+      - Jwt__Audience=TelexistenceClientsTest
+      - AllowedOrigins__0=*
+    depends_on:
+      - mongodb-test
+
+  mongodb-test:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_test_data:/data/db
+
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.tests
+    depends_on:
+      - api-test
+      - mongodb-test
+    environment:
+      - TEST_API_BASE_URL=http://api-test
+      - TEST_MONGODB_CONNECTION_STRING=mongodb://mongodb-test:27017
+      - TEST_MONGODB_DATABASE=TelexistenceTestDB
+
+volumes:
+  mongodb_test_data:
