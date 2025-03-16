@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files first to optimize layer caching 
+# Copy csproj files first to optimize layer caching
 COPY ["src/TelexistenceAPI/TelexistenceAPI.csproj", "src/TelexistenceAPI/"]
 COPY ["src/TelexistenceAPI.Core/TelexistenceAPI.Core.csproj", "src/TelexistenceAPI.Core/"]
 COPY ["tests/TelexistenceAPI.Tests/TelexistenceAPI.Tests.csproj", "tests/TelexistenceAPI.Tests/"]
