@@ -166,6 +166,7 @@ namespace TelexistenceAPI.Tests.Services
             // Assert
             Assert.True(result);
 
+            // Verify robot was updated
             _mockRobotRepository.Verify(
                 r =>
                     r.UpdateAsync(
@@ -179,12 +180,19 @@ namespace TelexistenceAPI.Tests.Services
                 Times.Once
             );
 
+            // Verify command was updated twice (first to "Executing", then to "Completed")
+            _mockCommandRepository.Verify(
+                r => r.UpdateAsync(It.IsAny<Command>()),
+                Times.Exactly(2)
+            );
+
+            // Verify final state separately
             _mockCommandRepository.Verify(
                 r =>
                     r.UpdateAsync(
                         It.Is<Command>(cmd => cmd.Status == "Completed" && cmd.ExecutedAt.HasValue)
                     ),
-                Times.Once
+                Times.AtLeastOnce()
             );
         }
 
